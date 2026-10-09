@@ -73,6 +73,27 @@ dim_payment_type ─┘        etl_run_log, dq_rejects_by_rule  (the Spark run's
 - `python -m src.warehouse` needs the Spark pipeline to have run first; its tests (`tests/test_warehouse.py`) use tiny
   parquet files and need no Spark.
 
+## Cloud: Google BigQuery (partitioning and clustering)
+
+`src/bigquery_load.py` loads the 2.7M curated rows into BigQuery (free sandbox project) twice and compares them:
+
+- `trips_flat`: a plain table.
+- `trips_opt`: `PARTITION BY RANGE_BUCKET(pickup_day, GENERATE_ARRAY(1, 32, 1))` and `CLUSTER BY pickup_borough, payment_type_name`.
+
+Benchmark query: trips on days 10-16 of the month with Manhattan pickups, count and average fare.
+
+| | Plain table | Partitioned + clustered |
+|---|---|---|
+| Bytes scanned (dry run) | 72.5 MB | 16.5 MB (**77.2% less**) |
+| Bytes billed | 73.4 MB | 16.8 MB |
+| Result | 552,018 trips, $14.65 average fare | identical |
+
+Notes: the partition column is the integer day of month, not the date. The BigQuery sandbox expires time partitions after 60 days,
+which silently emptied a first attempt that partitioned by `pickup_date` (January 2024 is older than that), so the script now checks that
+the partitioned table has the same row count as the flat one. The table is small (one month), so the absolute saving is megabytes; the
+point is the pruning pattern. Results are in `reports/bigquery_report.json`.
+Run it with `python -m src.bigquery_load --project YOUR_GCP_PROJECT_ID` (browser sign-in opens once).
+
 ## Orchestration (Prefect)
 
 `src/flow.py` wraps the stages in a [Prefect](https://www.prefect.io/) flow: `download -> spark-etl -> quality-gate -> load-warehouse`.

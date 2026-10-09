@@ -1,0 +1,22 @@
+{
+  "project_dataset": "nyc-taxi-de-511118.nyc_taxi",
+  "rows_loaded": 2713337,
+  "benchmark_query": "days 10-16 of the month x Manhattan pickups, count and average fare",
+  "bytes_scanned_dry_run": {
+    "flat": 72457687,
+    "partitioned_clustered": 16510465
+  },
+  "bytes_scanned_reduction_pct": 77.2,
+  "query_results": {
+    "flat": {
+      "bytes_billed": 73400320,
+      "trips": 552018,
+      "avg_fare": 14.65
+    },
+    "partitioned_clustered": {
+      "bytes_billed": 16777216,
+      "trips": 552018,
+      "avg_fare": 14.65
+    }
+  }
+}
