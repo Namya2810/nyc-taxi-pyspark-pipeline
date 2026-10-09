@@ -1,6 +1,6 @@
 {
   "month": "2024-01",
-  "run_at_utc": "2026-10-09 13:12:09",
+  "run_at_utc": "2026-10-09 17:25:06",
   "spark_version": "3.5.9",
   "data_quality": {
     "rows_in": 2964624,
@@ -19,10 +19,10 @@
   },
   "curated_rows": 2713337,
   "stage_seconds": {
-    "extract": 5.97,
-    "validate": 9.39,
-    "load": 33.39,
-    "report": 7.96
+    "extract": 6.37,
+    "validate": 9.31,
+    "load": 34.26,
+    "report": 7.78
   },
-  "total_seconds": 56.71
+  "total_seconds": 57.72
 }

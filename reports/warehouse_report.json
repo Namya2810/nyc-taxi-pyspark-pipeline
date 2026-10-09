@@ -1,5 +1,5 @@
 {
-  "load_seconds": 14.53,
+  "load_seconds": 14.65,
   "table_rows": {
     "fact_trips": 2713337,
     "dim_zone": 265,
@@ -16,10 +16,10 @@
     "no_orphan_date_or_payment_keys": true
   },
   "query_seconds": {
-    "revenue_by_borough_weekday": 0.035,
-    "top_routes_per_borough": 0.074,
-    "daily_trips_moving_avg": 0.006,
-    "airport_revenue_share": 0.016,
-    "tip_by_pickup_borough": 0.018
+    "revenue_by_borough_weekday": 0.034,
+    "top_routes_per_borough": 0.08,
+    "daily_trips_moving_avg": 0.007,
+    "airport_revenue_share": 0.015,
+    "tip_by_pickup_borough": 0.016
   }
 }

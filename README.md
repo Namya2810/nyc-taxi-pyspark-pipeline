@@ -73,6 +73,15 @@ dim_payment_type ─┘        etl_run_log, dq_rejects_by_rule  (the Spark run's
 - `python -m src.warehouse` needs the Spark pipeline to have run first; its tests (`tests/test_warehouse.py`) use tiny
   parquet files and need no Spark.
 
+## Orchestration (Prefect)
+
+`src/flow.py` wraps the stages in a [Prefect](https://www.prefect.io/) flow: `download -> spark-etl -> quality-gate -> load-warehouse`.
+
+- The download task retries twice and the warehouse load once, so a transient failure does not fail the run.
+- The **quality gate** stops the flow before the warehouse load if more than 15% of rows were rejected (configurable with `--max-reject-rate`).
+- Each task and its state is logged by Prefect. `python -m src.flow` ran end to end in about 1.5 minutes (Spark ETL plus warehouse load).
+- It runs on demand with a temporary local Prefect server; no scheduled deployment is set up.
+
 ## Run it
 
 Requirements: Python 3.10-3.12, Java 11 or 17 (`JAVA_HOME` set).
@@ -82,7 +91,8 @@ pip install -r requirements.txt
 python scripts/download_data.py 2024-01      # ~50 MB
 python -m src.pipeline --month 2024-01       # Spark ETL: raw -> curated parquet + reports
 python -m src.warehouse                      # curated -> star-schema warehouse + analytics
-python -m pytest -q                          # 13 tests
+python -m src.flow --month 2024-01           # or run everything through the Prefect flow
+python -m pytest -q                          # 16 tests
 ```
 
 ## Tests
