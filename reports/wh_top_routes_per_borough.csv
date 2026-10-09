@@ -1,0 +1,19 @@
+pickup_borough,pickup_zone,dropoff_zone,trips,avg_fare,avg_miles
+Bronx,Mott Haven/Port Morris,Central Harlem North,27,13.73,1.45
+Bronx,Mott Haven/Port Morris,Mott Haven/Port Morris,24,11.98,0.77
+Bronx,West Concourse,Central Harlem North,18,11.11,1.45
+Brooklyn,Cobble Hill,Brooklyn Heights,91,7.72,0.67
+Brooklyn,Park Slope,Park Slope,77,9.48,1.06
+Brooklyn,Williamsburg (North Side),Greenpoint,67,8.45,1.11
+EWR,Newark Airport,Newark Airport,6,79.48,6.28
+EWR,Newark Airport,Outside of NYC,5,54.36,8.15
+EWR,Newark Airport,Little Italy/NoLiTa,1,86.0,15.8
+Manhattan,Upper East Side South,Upper East Side North,20998,8.89,1.06
+Manhattan,Upper East Side North,Upper East Side South,18516,9.28,1.05
+Manhattan,Upper East Side North,Upper East Side North,14495,6.65,0.65
+Queens,JFK Airport,Outside of NYC,5745,101.83,20.25
+Queens,JFK Airport,Times Sq/Theatre District,5692,70.34,18.05
+Queens,LaGuardia Airport,Times Sq/Theatre District,5327,47.24,10.36
+Staten Island,New Dorp/Midland Beach,Fort Greene,1,70.0,15.45
+Staten Island,Mariners Harbor,Kensington,1,55.5,12.92
+Staten Island,West Brighton,West Brighton,1,4.4,0.34

@@ -1,0 +1,41 @@
+borough,day_of_week,trips,revenue,avg_fare
+Bronx,Wednesday,983,35661.8,33.19
+Bronx,Tuesday,835,31989.57,35.1
+Bronx,Thursday,811,29765.55,33.79
+Bronx,Friday,765,28598.88,34.18
+Bronx,Monday,662,24537.37,33.88
+Bronx,Saturday,443,13717.07,28.5
+Bronx,Sunday,376,11916.16,29.0
+Brooklyn,Wednesday,3031,103108.23,29.98
+Brooklyn,Tuesday,2869,94146.41,29.22
+Brooklyn,Monday,2678,88877.68,28.9
+Brooklyn,Thursday,2567,85148.8,29.34
+Brooklyn,Friday,2514,83523.26,29.22
+Brooklyn,Saturday,1424,45665.52,26.38
+Brooklyn,Sunday,1346,39405.6,24.23
+EWR,Monday,4,509.33,97.48
+EWR,Wednesday,3,359.95,104.73
+EWR,Saturday,1,204.7,146.5
+EWR,Thursday,2,195.57,72.5
+EWR,Tuesday,2,179.25,79.7
+EWR,Sunday,4,158.08,36.3
+Manhattan,Wednesday,411786,9494090.57,14.89
+Manhattan,Tuesday,379460,8669868.27,14.76
+Manhattan,Thursday,358142,8398518.3,15.17
+Manhattan,Friday,341648,7791171.33,14.71
+Manhattan,Saturday,353381,7672582.64,14.38
+Manhattan,Monday,321566,7266456.67,14.75
+Manhattan,Sunday,267854,5795927.24,14.22
+Queens,Monday,44572,3272585.27,53.47
+Queens,Tuesday,39835,2913284.73,53.26
+Queens,Wednesday,39908,2894887.28,52.61
+Queens,Sunday,34288,2464060.07,52.69
+Queens,Thursday,33171,2425294.1,53.09
+Queens,Friday,31010,2309751.02,53.95
+Queens,Saturday,26133,1876956.06,53.45
+Staten Island,Monday,5,461.48,62.24
+Staten Island,Thursday,1,354.23,264.1
+Staten Island,Wednesday,2,158.0,62.75
+Staten Island,Saturday,1,155.52,133.2
+Staten Island,Friday,1,103.94,90.5
+Staten Island,Tuesday,3,52.5,12.33

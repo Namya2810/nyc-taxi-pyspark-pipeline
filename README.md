@@ -2,7 +2,8 @@
 
 A batch data pipeline built with **PySpark** that ingests one month of NYC yellow-taxi trips (~3 million rows),
 validates every record against data-quality rules, quarantines the bad rows with a reason, enriches the good ones,
-writes a partitioned **curated parquet layer**, and produces **Spark SQL** analytics reports.
+writes a partitioned **curated parquet layer**, and produces **Spark SQL** analytics reports. A second stage loads the
+curated layer into a **star-schema warehouse (DuckDB)** with integrity checks and window-function analytics.
 
 Data: [NYC TLC Trip Record Data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page), January 2024
 (`yellow_tripdata_2024-01.parquet`, 2,964,624 rows) plus the taxi-zone lookup table (265 zones).
@@ -14,6 +15,7 @@ data/raw  ──►  extract  ──►  derive + validate  ──►  enrich (z
  parquet          │              │   └── failing rows ─────────────────────►  data/quarantine/rejects (parquet, with reject_reason)
  + zones.csv      │              └── run metrics ──────────────────────────►  reports/run_report.json
                   └─────────────────────────────  curated layer ──► Spark SQL ──► reports/*.csv
+                                                   curated layer ──► star schema (DuckDB) ──► reports/wh_*.csv
 ```
 
 | Stage | What it does |
@@ -51,6 +53,26 @@ A few findings from the curated data (full tables in `reports/`):
 - Busiest pickup zones: JFK Airport (135,476 trips, average fare $62.96), Upper East Side South (135,167) and Midtown Center (134,651).
 - Card payments (2,268,552 trips) average a **25.64% tip**; cash tips are not recorded, so tip % is only computed for card trips.
 
+## Warehouse layer (star schema)
+
+`src/warehouse.py` loads the curated parquet into a DuckDB database (`data/warehouse/taxi.duckdb`) as a star schema:
+
+```
+dim_date ─┐
+dim_zone ─┼──  fact_trips  (2,713,337 rows; pickup/dropoff zone, date, hour, payment type, distance, duration, fare, tip, total)
+dim_payment_type ─┘        etl_run_log, dq_rejects_by_rule  (the Spark run's data-quality metrics, queryable in SQL)
+```
+
+- Dimensions have primary keys and the fact table has **foreign keys**; after loading, 5 integrity checks must pass or the
+  build fails: fact rows equal curated rows, summed `total_amount` matches, no NULL keys, no orphan zone/date/payment keys.
+- Load time: 14.5 s for 2.7M rows. The five analytical queries (`reports/wh_*.csv`) each run in 6-74 ms:
+  revenue by borough and weekday, top 3 routes per pickup borough (window function), 7-day moving average of daily trips
+  (window function), airport share of revenue on weekdays vs weekends, and card tip % by borough.
+- Example findings: the busiest Manhattan route is Upper East Side South to North (20,998 trips); airports bring in about
+  22% of revenue on both weekdays and weekends; Manhattan card trips average a 26.26% tip.
+- `python -m src.warehouse` needs the Spark pipeline to have run first; its tests (`tests/test_warehouse.py`) use tiny
+  parquet files and need no Spark.
+
 ## Run it
 
 Requirements: Python 3.10-3.12, Java 11 or 17 (`JAVA_HOME` set).
@@ -58,8 +80,9 @@ Requirements: Python 3.10-3.12, Java 11 or 17 (`JAVA_HOME` set).
 ```bash
 pip install -r requirements.txt
 python scripts/download_data.py 2024-01      # ~50 MB
-python -m src.pipeline --month 2024-01
-python -m pytest -q                          # 8 tests
+python -m src.pipeline --month 2024-01       # Spark ETL: raw -> curated parquet + reports
+python -m src.warehouse                      # curated -> star-schema warehouse + analytics
+python -m pytest -q                          # 13 tests
 ```
 
 ## Tests
@@ -74,5 +97,6 @@ python -m pytest -q                          # 8 tests
 ## Notes and limits
 
 - Runs in Spark **local mode on one machine** (3M rows). It is a pipeline design project, not a cluster deployment.
+- The warehouse is an embedded DuckDB file on the same machine, not a cloud data warehouse such as BigQuery or Redshift.
 - Built and tested on **Windows 11** with PySpark 3.5.9 and Java 11. Spark's native parquet writer needs Hadoop's `winutils` on Windows, so on Windows the pipeline writes parquet with PyArrow from the Spark executors instead (`src/spark_session.py`). On Linux/macOS it uses Spark's standard writer; that branch is not tested here.
 - Validation thresholds (for example 80 mph, 180 minutes, $500) are sensible defaults chosen for this dataset, not TLC rules.
