@@ -1,0 +1,20 @@
+pickup_borough,pickup_zone,trips,avg_fare,zone_rank
+Bronx,Co-Op City,329,40.91,1
+Bronx,Mott Haven/Port Morris,310,27.09,2
+Bronx,East Concourse/Concourse Village,260,28.89,3
+Brooklyn,Downtown Brooklyn/MetroTech,1057,25.69,1
+Brooklyn,Fort Greene,825,21.63,2
+Brooklyn,Brooklyn Heights,775,23.93,3
+EWR,Newark Airport,16,81.26,1
+Manhattan,Upper East Side South,135167,12.29,1
+Manhattan,Midtown Center,134651,15.42,2
+Manhattan,Upper East Side North,127745,12.72,3
+N/A,Outside of NYC,297,75.33,1
+Queens,JFK Airport,135476,62.96,1
+Queens,LaGuardia Airport,86308,42.32,2
+Queens,East Elmhurst,11573,41.85,3
+Staten Island,Bloomfield/Emerson Hill,2,12.45,1
+Staten Island,Heartland Village/Todt Hill,2,111.85,1
+Staten Island,New Dorp/Midland Beach,2,70.0,1
+Staten Island,Arrochar/Fort Wadsworth,2,75.95,1
+Unknown,N/A,8953,18.69,1

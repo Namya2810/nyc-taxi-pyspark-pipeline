@@ -1,0 +1,6 @@
+pyspark>=3.5,<3.6
+pandas>=2.0,<2.3
+pyarrow>=14,<16
+numpy<2
+setuptools<81
+pytest>=8

@@ -1,0 +1,78 @@
+# NYC Taxi PySpark ETL Pipeline
+
+A batch data pipeline built with **PySpark** that ingests one month of NYC yellow-taxi trips (~3 million rows),
+validates every record against data-quality rules, quarantines the bad rows with a reason, enriches the good ones,
+writes a partitioned **curated parquet layer**, and produces **Spark SQL** analytics reports.
+
+Data: [NYC TLC Trip Record Data](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page), January 2024
+(`yellow_tripdata_2024-01.parquet`, 2,964,624 rows) plus the taxi-zone lookup table (265 zones).
+
+## Pipeline
+
+```
+data/raw  ──►  extract  ──►  derive + validate  ──►  enrich (zone join)  ──►  data/curated/trips   (parquet, partitioned by pickup_date)
+ parquet          │              │   └── failing rows ─────────────────────►  data/quarantine/rejects (parquet, with reject_reason)
+ + zones.csv      │              └── run metrics ──────────────────────────►  reports/run_report.json
+                  └─────────────────────────────  curated layer ──► Spark SQL ──► reports/*.csv
+```
+
+| Stage | What it does |
+|---|---|
+| **Extract** | Reads the raw parquet and the zone-lookup CSV |
+| **Validate** | Derives trip duration and speed, then applies 9 ordered rules; each failing row is tagged with the *first* rule it breaks. NULLs count as failures |
+| **Load** | Joins pickup/dropoff zone names (broadcast join of the small lookup table), computes tip %, writes the curated layer partitioned by `pickup_date` and the quarantine layer |
+| **Reconcile** | A gate that fails the run if curated rows != clean rows (the join must not add or drop rows) |
+| **Report** | Reads the curated layer back and runs Spark SQL: daily summary, hourly demand by borough, top zones per borough (window function), payment type and tips |
+
+Each run logs every stage to `logs/pipeline.log` and writes timings and quality counts to `reports/run_report.json`.
+
+## Results (January 2024, local run)
+
+| Metric | Value |
+|---|---|
+| Rows in | 2,964,624 |
+| Clean rows (curated) | 2,713,337 |
+| Rejected rows (quarantined) | 251,287 (8.48%) |
+| Total runtime | 56.7 s (extract 6.0, validate 9.4, load 33.4, report 8.0) |
+
+Rows rejected, by rule:
+
+| Rule | Rows |
+|---|---|
+| invalid_passenger_count (missing or outside 1-6) | 145,520 |
+| invalid_distance (<= 0 or >= 100 miles) | 36,269 |
+| duration_out_of_range (outside 1-180 min) | 36,234 |
+| invalid_fare (<= 0 or >= 500) | 32,294 |
+| dropoff_before_pickup | 870 |
+| unrealistic_speed (> 80 mph) | 82 |
+| pickup_outside_month | 18 |
+
+A few findings from the curated data (full tables in `reports/`):
+- Busiest pickup zones: JFK Airport (135,476 trips, average fare $62.96), Upper East Side South (135,167) and Midtown Center (134,651).
+- Card payments (2,268,552 trips) average a **25.64% tip**; cash tips are not recorded, so tip % is only computed for card trips.
+
+## Run it
+
+Requirements: Python 3.10-3.12, Java 11 or 17 (`JAVA_HOME` set).
+
+```bash
+pip install -r requirements.txt
+python scripts/download_data.py 2024-01      # ~50 MB
+python -m src.pipeline --month 2024-01
+python -m pytest -q                          # 8 tests
+```
+
+## Tests
+
+`tests/test_pipeline.py` runs against small in-memory DataFrames that use the same column types as the real files. It checks that:
+- every rule rejects exactly its own bad row, and that the first failing rule wins;
+- NULL values are rejected;
+- the quality report's counts add up;
+- derived columns are correct;
+- the zone join keeps the row count and adds zone names, and tip % is only set for card payments.
+
+## Notes and limits
+
+- Runs in Spark **local mode on one machine** (3M rows). It is a pipeline design project, not a cluster deployment.
+- Built and tested on **Windows 11** with PySpark 3.5.9 and Java 11. Spark's native parquet writer needs Hadoop's `winutils` on Windows, so on Windows the pipeline writes parquet with PyArrow from the Spark executors instead (`src/spark_session.py`). On Linux/macOS it uses Spark's standard writer; that branch is not tested here.
+- Validation thresholds (for example 80 mph, 180 minutes, $500) are sensible defaults chosen for this dataset, not TLC rules.

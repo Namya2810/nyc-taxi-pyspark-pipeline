@@ -1,0 +1,5 @@
+payment_type_name,trips,avg_tip_pct,avg_total
+Credit card,2268552,25.64,28.04
+Cash,414384,,23.82
+Dispute,21418,,25.24
+No charge,8983,,22.72

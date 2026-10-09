@@ -1,0 +1,28 @@
+{
+  "month": "2024-01",
+  "run_at_utc": "2026-10-09 13:12:09",
+  "spark_version": "3.5.9",
+  "data_quality": {
+    "rows_in": 2964624,
+    "rows_clean": 2713337,
+    "rows_rejected": 251287,
+    "reject_rate_pct": 8.48,
+    "rejected_by_rule": {
+      "invalid_passenger_count": 145520,
+      "invalid_distance": 36269,
+      "duration_out_of_range": 36234,
+      "invalid_fare": 32294,
+      "dropoff_before_pickup": 870,
+      "unrealistic_speed": 82,
+      "pickup_outside_month": 18
+    }
+  },
+  "curated_rows": 2713337,
+  "stage_seconds": {
+    "extract": 5.97,
+    "validate": 9.39,
+    "load": 33.39,
+    "report": 7.96
+  },
+  "total_seconds": 56.71
+}
